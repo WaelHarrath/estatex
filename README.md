@@ -4,8 +4,6 @@
 
 EstateX is a full-stack monorepo: a Next.js web app, a Socket.IO + BullMQ realtime layer, and a shared core package (Prisma data model, ledger-safe wallet, and domain services). An AI concierge (Claude) answers listing questions, drafts property listings, runs valuation comps, and makes buyer matches.
 
-> **Status:** Milestones M0–M5 complete. Local runtime E2E verified (DB, Redis, Socket.IO, BullMQ, web, auth, Stripe test checkout). **28/28 automated tests pass.**
-
 ## Highlights
 
 - 🏠 **Property marketplace** — browse, filter, and manage listings in any country
@@ -28,14 +26,6 @@ EstateX is a full-stack monorepo: a Next.js web app, a Socket.IO + BullMQ realti
 | **Money** | Stripe 22 (test mode), integer-cent wallet |
 | **Runtime** | Node.js 24 LTS, TypeScript, pino (structured JSON logs), vitest |
 
-## Architecture
-
-```
-npm workspaces
-├── apps/web        # Next.js app: UI, Server Actions, AI integration
-├── apps/socket     # Socket.IO event relay + BullMQ workers (auctions, dividends)
-└── packages/core   # Prisma schema + generated client, zod contracts,
-                    # wallet / property / auction / shares services, money & password utils
 ```
 
 - **PostgreSQL is the source of truth**; the socket process is a stateless event relay. No business logic lives in the socket layer.
@@ -100,23 +90,6 @@ The buyer wallet is pre-funded with **$1,500,000.00**.
 
 `docker compose up --build` runs postgres, redis, web (port 3000), and socket (port 3001) together.
 
-## Routes
-
-| Route | Purpose |
-|---|---|
-| `/` | Landing — the "live floor" with featured lot + market board |
-| `/properties` · `/properties/[id]` · `/properties/new` | Browse, view, and list properties |
-| `/auctions/[id]` · `/auctions/new` | Live auction room; open a listing for auction |
-| `/shares/[id]` · `/shares/new` | Fractional share program; start one |
-| `/wallet` | Ledger, balance, Stripe wallet funding |
-| `/chat` | AI concierge |
-| `/recommendations` | Personalized matches |
-| `/login` · `/register` | Auth |
-| `/health` | Web health check (socket: `:3001/health`) |
-
-### API
-
-`/api/auth/[...nextauth]` · `/api/wallet/fund` · `/api/stripe/webhook` · `/api/uploads` · `/api/chat`
 
 ## System Flow
 
