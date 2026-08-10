@@ -1,0 +1,278 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  BUYER
+  SELLER
+  AGENT
+  ADMIN
+}
+
+enum PropertyStatus {
+  DRAFT
+  ACTIVE
+  SOLD
+  OFF_MARKET
+}
+
+enum AuctionStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  ENDED
+  SETTLED
+}
+
+enum BidStatus {
+  ACTIVE
+  OUTBID
+  WON
+}
+
+enum ShareProgramStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+enum ShareAskStatus {
+  OPEN
+  FILLED
+  CANCELLED
+}
+
+enum DividendStatus {
+  PENDING
+  PAID
+}
+
+enum WalletTxType {
+  FUND
+  AUCTION_RESERVE
+  AUCTION_RELEASE
+  AUCTION_WIN_DEBIT
+  SHARE_PURCHASE
+  SHARE_SALE
+  DIVIDEND
+  ADMIN_ADJUST
+}
+
+enum AiDraftStatus {
+  DRAFT
+  APPROVED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(BUYER)
+  currency     String   @default("USD")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  wallet         Wallet?
+  properties     Property[]
+  auctionsSold   Auction[]         @relation("AuctionSeller")
+  bids           Bid[]
+  shareAsks      ShareAsk[]
+  shareHoldings  ShareHolding[]
+  dividendPayouts DividendPayout[]
+  chatMessages   ChatMessage[]
+  walletTxs      WalletTransaction[]
+}
+
+model Property {
+  id          String         @id @default(cuid())
+  ownerId     String
+  owner       User           @relation(fields: [ownerId], references: [id])
+  title       String
+  description String
+  priceCents  BigInt
+  currency    String         @default("USD")
+  country     String
+  city        String
+  address     String
+  sqft        Int
+  bedrooms    Int
+  bathrooms   Int
+  status      PropertyStatus @default(DRAFT)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  images       PropertyImage[]
+  auction      Auction?
+  shareProgram ShareProgram?
+  aiDraft      AiListingDraft?
+
+  @@index([country, city])
+  @@index([status])
+}
+
+model PropertyImage {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  url        String
+  alt        String?
+  sortOrder  Int      @default(0)
+}
+
+model Auction {
+  id                String        @id @default(cuid())
+  propertyId        String        @unique
+  property          Property      @relation(fields: [propertyId], references: [id])
+  sellerId          String
+  seller            User          @relation("AuctionSeller", fields: [sellerId], references: [id])
+  startPriceCents   BigInt
+  currentPriceCents BigInt
+  minIncrementCents BigInt
+  startAt           DateTime
+  endAt             DateTime
+  autoExtendSeconds Int           @default(30)
+  status            AuctionStatus @default(DRAFT)
+  winningBidId      String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  bids Bid[]
+
+  @@index([status, endAt])
+}
+
+model Bid {
+  id          String    @id @default(cuid())
+  auctionId   String
+  auction     Auction   @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  bidderId    String
+  bidder      User      @relation(fields: [bidderId], references: [id])
+  amountCents BigInt
+  status      BidStatus @default(ACTIVE)
+  createdAt   DateTime  @default(now())
+
+  @@index([auctionId, amountCents])
+}
+
+model Wallet {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id])
+  availableCents BigInt   @default(0)
+  reservedCents  BigInt   @default(0)
+  updatedAt      DateTime @updatedAt
+}
+
+model WalletTransaction {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  type        WalletTxType
+  amountCents BigInt
+  referenceId String?
+  note        String?
+  createdAt   DateTime     @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model ShareProgram {
+  id                 String             @id @default(cuid())
+  propertyId         String             @unique
+  property           Property           @relation(fields: [propertyId], references: [id])
+  totalShares        Int
+  issuedShares       Int                @default(0)
+  pricePerShareCents BigInt
+  status             ShareProgramStatus @default(DRAFT)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  asks      ShareAsk[]
+  holdings  ShareHolding[]
+  dividends Dividend[]
+
+  @@index([status])
+}
+
+model ShareAsk {
+  id                String         @id @default(cuid())
+  programId         String
+  program           ShareProgram   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  sellerId          String
+  seller            User           @relation(fields: [sellerId], references: [id])
+  units             Int
+  unitsLeft         Int
+  pricePerUnitCents BigInt
+  status            ShareAskStatus @default(OPEN)
+  createdAt         DateTime       @default(now())
+
+  @@index([programId, status])
+}
+
+model ShareHolding {
+  id        String       @id @default(cuid())
+  programId String
+  program   ShareProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+  ownerId   String
+  owner     User         @relation(fields: [ownerId], references: [id])
+  units     Int
+
+  @@unique([programId, ownerId])
+}
+
+model Dividend {
+  id               String         @id @default(cuid())
+  programId        String
+  program          ShareProgram   @relation(fields: [programId], references: [id], onDelete: Cascade)
+  perShareCents    BigInt
+  totalAmountCents BigInt
+  status           DividendStatus @default(PENDING)
+  createdAt        DateTime       @default(now())
+  paidAt           DateTime?
+
+  payouts DividendPayout[]
+
+  @@index([status])
+}
+
+model DividendPayout {
+  id          String   @id @default(cuid())
+  dividendId  String
+  dividend    Dividend @relation(fields: [dividendId], references: [id], onDelete: Cascade)
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id])
+  units       Int
+  amountCents BigInt
+
+  @@unique([dividendId, ownerId])
+}
+
+model AiListingDraft {
+  id          String         @id @default(cuid())
+  propertyId  String         @unique
+  property    Property       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  bullets     String[]
+  status      AiDraftStatus  @default(DRAFT)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId String
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([userId, sessionId, createdAt])
+}

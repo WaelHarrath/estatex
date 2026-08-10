@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: estatex
+      POSTGRES_PASSWORD: estatex
+      POSTGRES_DB: estatex
+    ports:
+      # Host 5434 → container 5432 (5432/5433 may be used by other local projects).
+      - "5434:5432"
+    volumes:
+      # postgres:18 requires a single mount at /var/lib/postgresql (pg_upgrade compat).
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U estatex -d estatex"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      # Host 6380 → container 6379 (6379 may be used by other local projects).
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://estatex:estatex@postgres:5432/estatex
+      REDIS_URL: redis://redis:6379
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-dev-secret-change-me}
+      AI_MODEL: ${AI_MODEL:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "3000:3000"
+
+  socket:
+    build:
+      context: .
+      dockerfile: apps/socket/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://estatex:estatex@postgres:5432/estatex
+      REDIS_URL: redis://redis:6379
+      SOCKET_PORT: 3001
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "3001:3001"
+
+volumes:
+  pgdata:

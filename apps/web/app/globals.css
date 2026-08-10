@@ -1,0 +1,292 @@
+@import "tailwindcss";
+
+@theme {
+  /* ─── Midnight Skyline — EstateX ─────────────────────────────
+     Deep-navy glass, one champagne-gold signature, ledger mono
+     for every figure that means money, time, or a unit of land. */
+
+  /* Ground + surfaces */
+  --color-abyss: #0a0f1e;
+  --color-abyss-deep: #070b15;
+  --color-panel: #101a2c;
+  --color-panel-2: #182740;
+
+  /* Ink */
+  --color-porcelain: #edf2f9;
+  --color-porcelain-soft: #93a0b8;
+  --color-porcelain-faint: #6e7c96;
+
+  /* Signature accents */
+  --color-gold: #c9a96a;
+  --color-gold-bright: #e8d098;
+  --color-azure: #5b8dff;
+  --color-ember: #e2665b;
+
+  /* Structure */
+  --color-hairline: #1b2740;
+  --color-hairline-bright: #2e4063;
+
+  /* ── Legacy token aliases ─────────────────────────────────────
+     The previous theme named its colors "paper / ink / cadastral /
+     stamp". We keep those names wired to the new palette so every
+     existing surface class (bg-paper, text-ink, border-hairline,
+     text-cadastral, bg-cadastral, text-stamp …) restyles in place. */
+  --color-paper: #0a0f1e;
+  --color-paper-deep: #070b15;
+  --color-paper-raise: #101a2c;
+  --color-ink: #edf2f9;
+  --color-ink-soft: #93a0b8;
+  --color-cadastral: #c9a96a;
+  --color-cadastral-soft: #6e7c96;
+  --color-stamp: #c9a96a;
+
+  /* Typography */
+  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-abyss);
+    color: var(--color-porcelain);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--color-gold);
+    color: var(--color-abyss);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+  }
+
+  /* Every number that means money, time, or a unit of land speaks in ledger mono. */
+  .figure {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+  }
+
+  /* The state seal: a hairline gold chip with a soft glow. */
+  .stamp {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--color-gold-bright);
+    border: 1px solid color-mix(in srgb, var(--color-gold) 55%, transparent);
+    background: color-mix(in srgb, var(--color-gold) 12%, transparent);
+    border-radius: 0.375rem;
+    padding: 0.28rem 0.6rem 0.26rem;
+    line-height: 1;
+    box-shadow: 0 0 18px color-mix(in srgb, var(--color-gold) 18%, transparent);
+  }
+
+  /* Blueprint lattice: a faint drafting dot-grid for survey atmosphere. */
+  .survey-grid {
+    background-image: radial-gradient(
+      color-mix(in srgb, var(--color-azure) 16%, transparent) 1px,
+      transparent 1.2px
+    );
+    background-size: 24px 24px;
+  }
+
+  /* A single survey crosshair mark (place one or two per surface). */
+  .crosshair {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+  }
+  .crosshair::before,
+  .crosshair::after {
+    content: "";
+    position: absolute;
+    background: color-mix(in srgb, var(--color-gold) 50%, transparent);
+  }
+  .crosshair::before {
+    left: 7px;
+    top: 0;
+    height: 100%;
+    width: 1px;
+  }
+  .crosshair::after {
+    top: 7px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+  }
+
+  /* ── Midnight Skyline utilities ─────────────────────────────── */
+
+  /* Small gold eyebrow label — mono, spaced, uppercase. */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    color: var(--color-gold);
+  }
+
+  /* Frosted panel: translucent navy with a hairline edge. */
+  .glass {
+    background: color-mix(in srgb, var(--color-panel) 78%, transparent);
+    backdrop-filter: blur(14px);
+    border: 1px solid var(--color-hairline);
+  }
+
+  /* Gold keyline — a thin luminous rule that marks a surface's top edge. */
+  .keyline {
+    position: relative;
+  }
+  .keyline::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--color-gold) 70%, transparent),
+      transparent
+    );
+  }
+
+  /* Architectural corner brackets, top-left + bottom-right. */
+  .corner::before,
+  .corner::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1px solid color-mix(in srgb, var(--color-gold) 55%, transparent);
+    pointer-events: none;
+  }
+  .corner::before {
+    top: 0.625rem;
+    left: 0.625rem;
+    border-right: 0;
+    border-bottom: 0;
+  }
+  .corner::after {
+    right: 0.625rem;
+    bottom: 0.625rem;
+    border-left: 0;
+    border-top: 0;
+  }
+
+  /* Primary action — champagne gold, dark type, soft halo. */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: linear-gradient(180deg, var(--color-gold-bright), var(--color-gold));
+    color: var(--color-abyss);
+    font-weight: 600;
+    border-radius: 0.5rem;
+    padding: 0.7rem 1.25rem;
+    font-size: 0.9rem;
+    transition: filter 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    box-shadow: 0 8px 24px -12px color-mix(in srgb, var(--color-gold) 70%, transparent);
+  }
+  .btn-primary:hover {
+    filter: brightness(1.06);
+    box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--color-gold) 85%, transparent);
+  }
+  .btn-primary:active {
+    transform: translateY(1px);
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* Secondary action — hairline glass button. */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid var(--color-hairline-bright);
+    color: var(--color-porcelain);
+    font-weight: 500;
+    border-radius: 0.5rem;
+    padding: 0.7rem 1.25rem;
+    font-size: 0.9rem;
+    background: color-mix(in srgb, var(--color-panel) 55%, transparent);
+    transition: border-color 160ms ease, color 160ms ease, background 160ms ease;
+  }
+  .btn-ghost:hover {
+    border-color: color-mix(in srgb, var(--color-gold) 60%, transparent);
+    color: var(--color-gold-bright);
+  }
+
+  /* Pulsing live marker. */
+  .live-dot {
+    position: relative;
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 9999px;
+    background: var(--color-gold);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-gold) 60%, transparent);
+    animation: live-pulse 2s infinite;
+  }
+  @keyframes live-pulse {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-gold) 55%, transparent);
+    }
+    70% {
+      box-shadow: 0 0 0 7px transparent;
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+  }
+
+  /* Fade-up reveal on load — used sparingly on hero surfaces. */
+  .reveal {
+    animation: fade-up 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .reveal-delay-1 {
+    animation-delay: 120ms;
+  }
+  .reveal-delay-2 {
+    animation-delay: 240ms;
+  }
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

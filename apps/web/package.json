@@ -1,0 +1,34 @@
+{
+  "name": "@estatex/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@estatex/core": "*",
+    "@anthropic-ai/sdk": "0.115.0",
+    "ioredis": "6.0.0",
+    "next": "16.3.0",
+    "next-auth": "4.24.15",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "socket.io-client": "4.8.3",
+    "stripe": "22.4.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "26.1.2",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "tailwindcss": "4.3.3",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  }
+}

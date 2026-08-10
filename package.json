@@ -1,0 +1,25 @@
+{
+  "name": "estatex",
+  "version": "0.1.0",
+  "private": true,
+  "description": "International AI real-estate platform: buy/sell property worldwide, live auctions, fractional shares.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "node scripts/dev.mjs web",
+    "dev:socket": "node scripts/dev.mjs socket",
+    "build": "npm run build -w @estatex/core && npm run build -w @estatex/socket && npm run build -w @estatex/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "db:generate": "npm run db:generate -w @estatex/core",
+    "db:migrate": "npm run db:migrate -w @estatex/core",
+    "db:deploy": "npm run db:deploy -w @estatex/core",
+    "db:seed": "npm run db:seed -w @estatex/core"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}
